@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gateproxy</title>
+  <link rel="stylesheet" href="./style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Outfit:wght@500;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="mark"></div>
+      <div>
+        <h1>Gateproxy</h1>
+        <p>Go API gateway · JWT · rate limit · reverse proxy</p>
+      </div>
+    </div>
+    <span id="health" class="pill">…</span>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Mint JWT</h2>
+      <label>Subject <input id="sub" value="kian" /></label>
+      <label>Admin token <input id="admin" value="admin-dev-token" /></label>
+      <button id="mint">Issue token</button>
+      <pre id="tokenOut">—</pre>
+    </section>
+    <section class="panel">
+      <h2>Routes</h2>
+      <div id="routes"></div>
+    </section>
+    <section class="panel wide">
+      <h2>Try proxy</h2>
+      <p class="hint">Public: <code>/httpbin/get</code> · Protected: <code>/postman/get</code> (needs Bearer)</p>
+      <div class="row">
+        <input id="path" value="/httpbin/get" />
+        <button id="probe">GET</button>
+      </div>
+      <pre id="probeOut">—</pre>
+    </section>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>
