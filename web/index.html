@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Gateproxy</title>
   <link rel="stylesheet" href="./style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Outfit:wght@500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@450;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
 </head>
 <body>
   <header>
@@ -13,7 +13,7 @@
       <div class="mark"></div>
       <div>
         <h1>Gateproxy</h1>
-        <p>Go API gateway · JWT · rate limit · reverse proxy</p>
+        <p>Go gateway · JWT roles · circuit breaker · rate limit</p>
       </div>
     </div>
     <span id="health" class="pill">…</span>
@@ -25,6 +25,12 @@
     <section class="panel">
       <h2>Mint JWT</h2>
       <label>Subject <input id="sub" value="kian" /></label>
+      <label>Role
+        <select id="role">
+          <option value="user">user</option>
+          <option value="admin">admin</option>
+        </select>
+      </label>
       <label>Admin token <input id="admin" value="admin-dev-token" /></label>
       <button id="mint">Issue token</button>
       <pre id="tokenOut">—</pre>
@@ -35,7 +41,7 @@
     </section>
     <section class="panel wide">
       <h2>Try proxy</h2>
-      <p class="hint">Public: <code>/httpbin/get</code> · Protected: <code>/postman/get</code> (needs Bearer)</p>
+      <p class="hint">Public <code>/httpbin/get</code> · User <code>/postman/get</code> · Admin <code>/admin-echo/get</code></p>
       <div class="row">
         <input id="path" value="/httpbin/get" />
         <button id="probe">GET</button>

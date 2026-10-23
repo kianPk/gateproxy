@@ -1,6 +1,6 @@
 # Gateproxy
 
-**Production-shaped API gateway in Go** — reverse proxy, JWT auth, token-bucket rate limiting, Prometheus-style metrics, and an operator dashboard.
+**Production-shaped API gateway in Go** — reverse proxy, JWT roles, circuit breaker, token-bucket rate limiting, CORS, and an operator console.
 
 ![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
@@ -8,44 +8,34 @@
 ## Features
 
 - Longest-prefix route matching → upstream targets
-- Per-route JWT requirement
-- IP token-bucket rate limit (`GATE_RATE_RPS` / `GATE_RATE_BURST`)
-- `/metrics` (Prometheus text), `/healthz`, `/readyz`
-- `POST /v1/token` to mint HS256 JWTs (admin token gated)
-- Embedded web console for minting tokens & probing routes
-- Graceful shutdown
+- Per-route JWT + role allow-lists (`user` / `admin`)
+- Circuit breaker per route (`GATE_BREAKER_FAILS`, `GATE_BREAKER_COOLDOWN_MS`)
+- IP token-bucket rate limit
+- Request IDs (`X-Request-Id`) and CORS
+- `/v1/status`, `/metrics`, `/healthz`, `/readyz`
+- `POST /v1/token` mint HS256 JWTs (admin gated)
+- Routes from env JSON or `GATE_ROUTES_FILE`
+- Embedded web console + GitHub Pages demo
 
 ## Quick start
 
 ```bash
+go test ./...
 go run .
-# dashboard → http://localhost:8080
-# public proxy → http://localhost:8080/httpbin/get
+# open http://localhost:8080
 ```
 
-Mint a token:
+## Env
 
-```bash
-curl -s localhost:8080/v1/token -H 'content-type: application/json' \
-  -d '{"sub":"kian","admin_token":"admin-dev-token"}'
-```
-
-Call a protected route:
-
-```bash
-curl -H "Authorization: Bearer $TOKEN" localhost:8080/postman/get
-```
-
-## Config (env)
-
-| Var | Default | Meaning |
-|-----|---------|---------|
+| Variable | Default | Purpose |
+|---|---|---|
 | `GATE_LISTEN` | `:8080` | bind address |
 | `GATE_JWT_SECRET` | dev secret | HS256 key |
 | `GATE_ADMIN_TOKEN` | `admin-dev-token` | mint gate |
-| `GATE_RATE_RPS` | `20` | refill rate |
-| `GATE_ROUTES_JSON` | built-in | override routes JSON |
+| `GATE_RATE_RPS` / `GATE_RATE_BURST` | `20` / `40` | limiter |
+| `GATE_ROUTES_JSON` / `GATE_ROUTES_FILE` | built-in | route table |
+| `GATE_CORS_ORIGINS` | `*` | CORS |
 
-## License
+## Demo
 
-MIT © [kianPk](https://github.com/kianPk)
+[kianpk.github.io/gateproxy](https://kianpk.github.io/gateproxy/)
