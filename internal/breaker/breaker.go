@@ -43,14 +43,15 @@ func New(threshold int, cooldown time.Duration) *Breaker {
 func (b *Breaker) Allow(key string) bool {
 	b.mu.Lock()
 	defer b.mu.Unlock()
+	// Only one in-flight probe while half-open.
+	if b.probing[key] {
+		return false
+	}
 	if until, ok := b.openUntil[key]; ok {
 		if time.Now().Before(until) {
 			return false
 		}
-		// Cooldown expired → admit exactly one probe in half-open.
-		if b.probing[key] {
-			return false
-		}
+		// Cooldown expired → admit exactly one probe.
 		b.probing[key] = true
 		delete(b.openUntil, key)
 		return true
