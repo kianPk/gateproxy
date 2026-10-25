@@ -21,20 +21,22 @@ import (
 )
 
 type Gateway struct {
-	cfg     config.Config
-	limiter *ratelimit.Limiter
-	metrics *metrics.Registry
-	breaker *breaker.Breaker
-	log     *log.Logger
+	cfg       config.Config
+	limiter   *ratelimit.Limiter
+	metrics   *metrics.Registry
+	breaker   *breaker.Breaker
+	log       *log.Logger
+	startedAt time.Time
 }
 
 func New(cfg config.Config, m *metrics.Registry, logger *log.Logger) *Gateway {
 	return &Gateway{
-		cfg:     cfg,
-		limiter: ratelimit.New(cfg.RateRPS, cfg.RateBurst),
-		metrics: m,
-		breaker: breaker.New(cfg.BreakerFail, cfg.BreakerCool),
-		log:     logger,
+		cfg:       cfg,
+		limiter:   ratelimit.New(cfg.RateRPS, cfg.RateBurst),
+		metrics:   m,
+		breaker:   breaker.New(cfg.BreakerFail, cfg.BreakerCool),
+		log:       logger,
+		startedAt: time.Now(),
 	}
 }
 
@@ -47,11 +49,13 @@ func (g *Gateway) Handler() http.Handler {
 		writeJSON(w, 200, map[string]any{"ready": true, "routes": len(g.cfg.Routes)})
 	})
 	mux.HandleFunc("/v1/status", func(w http.ResponseWriter, _ *http.Request) {
+		uptime := time.Since(g.startedAt).Seconds()
 		writeJSON(w, 200, map[string]any{
-			"service": "gateproxy",
-			"routes":  len(g.cfg.Routes),
-			"breaker": g.breaker.Snapshot(),
-			"rate":    map[string]any{"rps": g.cfg.RateRPS, "burst": g.cfg.RateBurst},
+			"service":         "gateproxy",
+			"routes":          len(g.cfg.Routes),
+			"uptime_seconds":  uptime,
+			"breaker":         g.breaker.Snapshot(),
+			"rate":            map[string]any{"rps": g.cfg.RateRPS, "burst": g.cfg.RateBurst},
 		})
 	})
 	mux.Handle("/metrics", http.HandlerFunc(g.metrics.Handler))

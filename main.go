@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/kianPk/gateproxy/internal/accesslog"
 	"github.com/kianPk/gateproxy/internal/config"
 	"github.com/kianPk/gateproxy/internal/metrics"
 	"github.com/kianPk/gateproxy/internal/proxy"
@@ -42,9 +43,11 @@ func main() {
 		api.ServeHTTP(w, r)
 	})
 
+	handler := accesslog.Middleware(os.Stdout, root)
+
 	srv := &http.Server{
 		Addr:         cfg.Listen,
-		Handler:      root,
+		Handler:      handler,
 		ReadTimeout:  cfg.ReadTimeout,
 		WriteTimeout: cfg.WriteTimeout,
 	}
